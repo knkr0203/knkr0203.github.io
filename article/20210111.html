@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Knkr0203's page | Mockito で SpringBoot のテストを書く</title>
+    <link rel="stylesheet" href="../css/stylesheet.css" />
+  </head>
+  <body>
+    <header>
+      <div class="container">
+        <div class="header-left">
+          <a href="/">Knkr0203's page</a>
+        </div>
+      </div>
+    </header>
+    <main>
+      <div class="title-wrapper">
+        <div class="container">
+          <h1>Mockito で SpringBoot のテストを書く</h1>
+          <div>
+            Java のテストフレームワークとして有名な Mockito を使って SpringBoot
+            のテストを作成する。
+          </div>
+          <div>
+            今回は Mockito の @Spy を使って Service のテストを書くことにする。
+          </div>
+        </div>
+      </div>
+      <div class="section-wrapper">
+        <div class="container">
+          <h2>構成</h2>
+          <pre class="source-code">
+            <code>
+SampleProject
+  └src
+    ├main
+    │ └java
+    │   └com
+    │     └example
+    │       └sample
+    │         ├service
+    │         │  ├SampleService1.java
+    │         │  └SampleService2.java
+    │         └SampleApplication.java
+    └test
+      └java
+        └com
+          └example
+            └sample
+              ├service
+              │  └SampleService1Test.java
+              └SampleApplicationTests.java
+            </code>
+          </pre>
+        </div>
+      </div>
+      <div class="section-wrapper">
+        <div class="container">
+          <h5>SampleService1.java</h5>
+          <pre class="source-code">
+            <code>
+package com.example.sample.service;
+
+import org.springframework.stereotype.Service;
+
+@Service
+public class SampleService1 {
+    SampleService2 sampleService2;
+
+    public SampleService1(SampleService2 sampleService2) {
+        this.sampleService2 = sampleService2;
+    }
+
+    public String hello1() {
+        return sampleService2.hello2();
+    }
+}
+            </code>
+          </pre>
+        </div>
+      </div>
+      <div class="section-wrapper">
+        <div class="container">
+          <h5>SampleService2.java</h5>
+          <pre class="source-code">
+            <code>
+package com.example.sample.service;
+
+import org.springframework.stereotype.Service;
+
+@Service
+public class SampleService2 {
+    public String hello2() {
+        return "Hello World!!";
+    }
+}              
+            </code>
+          </pre>
+        </div>
+      </div>
+      <div class="section-wrapper">
+        <div class="container">
+          <div>SampleService1 ... SampleService2を呼び出す</div>
+          <div>SampleService2 ... SampleService1から呼び出される</div>
+        </div>
+      </div>
+      <div class="section-wrapper">
+        <div class="container">
+          <h2>テスト</h2>
+          <div>
+            SampleService1Test クラスでは SampleService1
+            クラスのテストだけをしたいので SampleService2 クラスは Spy
+            を使ってテストすることにする。
+          </div>
+        </div>
+      </div>
+      <div class="section-wrapper">
+        <div class="container">
+          <h5>SampleService1Test.java</h5>
+          <pre class="source-code">
+            <code>
+package com.example.sample.service;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
+
+class SampleService1Test {
+
+    SampleService1 sampleService1;
+
+    @Spy
+    SampleService2 sampleService2 = new SampleService2();
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        sampleService1 = new SampleService1(sampleService2);
+    }
+
+    @Test
+    void test001() {
+        String str = "test1";
+        when(sampleService2.hello2()).thenReturn(str);
+        assertEquals(sampleService1.hello1(), str);
+    }
+}
+            </code>
+          </pre>
+        </div>
+      </div>
+      <div class="section-wrapper">
+        <div class="container">
+          <div>
+            @Spy をつけたクラスは Mockito.when
+            を使用することでメソッドの返り値を設定することができる。
+          </div>
+          <div>
+            上記テストが成功したことにより、SampleService1 は SampleService2
+            を正しく呼び出せていることが確認できた。
+          </div>
+        </div>
+      </div>
+    </main>
+    <footer>
+      <div class="container">
+        <p>Copyright © 2021 Knkr0203's profile All Rights Reserved.</p>
+      </div>
+    </footer>
+  </body>
+</html>
